@@ -6,14 +6,14 @@
     {% for item in results_list %}
         <div class="pb-3">
             <div class="doc-title">
-                <a href="{{ item.url }}">{{ AUTHOR }}...
+                <a href="{{ item.url }}">{{ item.title }}...
                 </a>
             </div>
             <div class="cited">
-                <cite> <a href="{{ item.url }}">{{ URL }}</a></cite>
+                <cite> <a href="{{ item.url }}">{{ item.url }}</a></cite>
             </div>
             <div class="doc-desc">
-                — {{ QUOTE }}
+                {{ item.doc_date }} — {{ item.description }}
             </div>
 
         </div>
