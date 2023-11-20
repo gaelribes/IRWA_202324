@@ -43,7 +43,8 @@ full_path = os.path.realpath(__file__)
 path, filename = os.path.split(full_path)
 # print(path + ' --> ' + filename + "\n")
 # load documents corpus into memory.
-file_path = path + "/tweets-data-who.json"
+
+file_path = path + "/../data/Rus_Ukr_war_data.json"
 
 # file_path = "../../tweets-data-who.json"
 corpus = load_corpus(file_path)

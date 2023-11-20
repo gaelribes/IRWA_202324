@@ -1,10 +1,25 @@
 import pandas as pd
 
+import re
+
 from myapp.core.utils import load_json_file
 from myapp.search.objects import Document
 
 _corpus = {}
 
+
+def their_load_corpus(path) -> [Document]:
+    """
+    Load file and transform to dictionary with each document as an object for easier treatment when needed for displaying
+     in results, stats, etc.
+    :param path:
+    :return:
+    """
+    print("-- Loading corpus...")
+    df = _load_corpus_as_dataframe(path)
+    df.apply(_row_to_doc_dict, axis=1)
+    print("-- Corpus loaded! Returning", type(df))
+    return _corpus
 
 def load_corpus(path) -> [Document]:
     """
@@ -13,9 +28,44 @@ def load_corpus(path) -> [Document]:
     :param path:
     :return:
     """
-    df = _load_corpus_as_dataframe(path)
+    print("-- Loading corpus...")
+
+    df = pd.read_json(path, lines=True)
+    df = clean_raw_dataset(df)
     df.apply(_row_to_doc_dict, axis=1)
+    print("-- Corpus loaded! Returning", type(_corpus))
     return _corpus
+
+def clean_raw_dataset(raw_df):
+    # Select only relevant columns
+    clean_df = raw_df[["created_at","id","full_text","entities","favorite_count","retweet_count","user"]]
+
+    # Rename columns
+    renames = {"created_at":"date", "full_text":"tweet", "favorite_count":"likes","retweet_count":"retweets", "id":"tweet_id"}
+    clean_df = clean_df.rename(columns=renames)
+
+    # Create Series of list of hashtags from `entities` object
+    df_hashtags = pd.json_normalize(clean_df["entities"])["hashtags"]
+    df_hashtags = df_hashtags.apply(lambda x: [item["text"] for item in x])
+
+    # Create Series of username ids
+    df_user = pd.json_normalize(clean_df["user"])["id"].rename("user_id")
+    df_username = pd.json_normalize(clean_df["user"])["screen_name"].rename("username")
+
+    # Merge hashtags and username columns to the DataFrame
+    clean_df = pd.concat([clean_df,df_hashtags,df_user, df_username], axis=1).drop(columns=["entities","user"])
+
+    # Create URL column manually from the user id and tweet id columns
+    clean_df["url"] = "https://twitter.com/" + clean_df["user_id"].astype(str) + "/status/" + clean_df["tweet_id"].astype(str)
+
+    # Extract tags to other users from the tweet body
+    clean_df["tags"] = clean_df["tweet"].apply(lambda x: re.findall(r"@(\w+)", x))
+
+    # Returns a DataFrame of tweets with columns ["date", "tweet_id", "tweet", "likes", "retweets", "hashtags", "user_id", "url", "tags", "tags"]
+    # Should return ["Id", "Tweet", "Date", "Likes", "Retweets", "Url", "Hashtags"]
+    clean_df = clean_df.rename(columns={"tweet_id": "Id", "tweet": "Tweet", "date": "Date", "likes": "Likes", "retweets": "Retweets", "url": "Url", "hashtags": "Hashtags"})
+    return clean_df
+
 
 
 def _load_corpus_as_dataframe(path):
@@ -23,6 +73,7 @@ def _load_corpus_as_dataframe(path):
     Load documents corpus from file in 'path'
     :return:
     """
+    print("---- Loading corpus as DataFrame...")
     json_data = load_json_file(path)
     tweets_df = _load_tweets_as_dataframe(json_data)
     _clean_hashtags_and_urls(tweets_df)
@@ -35,6 +86,7 @@ def _load_corpus_as_dataframe(path):
     # select only interesting columns
     filter_columns = ["Id", "Tweet", "Username", "Date", "Hashtags", "Likes", "Retweets", "Url", "Language"]
     corpus = corpus[filter_columns]
+    print("---- Corpus loaded as DataFrame! Returning", type(corpus))
     return corpus
 
 

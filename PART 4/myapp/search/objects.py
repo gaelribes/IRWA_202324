@@ -10,7 +10,7 @@ class Document:
         self.id = id
         self.title = title
         self.description = description
-        self.doc_date = doc_date
+        self.doc_date = str(doc_date)
         self.likes = likes
         self.retweets = retweets
         self.url = url
