@@ -50,7 +50,6 @@ file_path = path + "/../data/Rus_Ukr_war_data.json"
 corpus = load_corpus(file_path)
 print("loaded corpus. first elem:", list(corpus.values())[0])
 
-
 # Home URL "/"
 @app.route('/')
 def index():
