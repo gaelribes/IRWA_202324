@@ -47,11 +47,6 @@ class TfIdfIndex():
         self.df = defaultdict(int)
         self.idf = defaultdict(float)
 
-
-
-        stemmed_text = stemmed_text.tolist()
-        ids = ids.tolist()
-
         for key in corpus:
 
             tweet = corpus[key]

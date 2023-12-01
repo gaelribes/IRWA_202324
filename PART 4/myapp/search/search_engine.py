@@ -87,7 +87,7 @@ class SearchEngine:
         results = []
 
         results = search_in_corpus(search_query,
-                                   self.index,
+                                   self.index.index,
                                    self.index.tf,
                                    self.index.idf,
                                    self.popularity,

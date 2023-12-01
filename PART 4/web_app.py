@@ -46,9 +46,7 @@ path, filename = os.path.split(full_path)
 
 file_path = path + "/../data/Rus_Ukr_war_data.json"
 
-# file_path = "../../tweets-data-who.json"
-corpus = load_corpus(file_path)
-print("loaded corpus. first elem:", list(corpus.values())[0])
+
 
 # Home URL "/"
 @app.route('/')
@@ -173,4 +171,12 @@ def sentiment_form_post():
 
 
 if __name__ == "__main__":
+
+    # file_path = "../../tweets-data-who.json"
+    corpus = load_corpus(file_path)
+    print("\nloaded corpus. first elem:", list(corpus.values())[0], "\n")
+    print("\nBuilding index....")
+    search_engine.build_index(corpus)
+    print("Index built!!\n")
+
     app.run(port=8088, host="0.0.0.0", threaded=False, debug=True)
