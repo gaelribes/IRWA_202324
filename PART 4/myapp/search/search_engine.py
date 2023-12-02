@@ -1,10 +1,13 @@
 import random
 import numpy as np
+import os
+import pickle
 
 from myapp.search.objects import ResultItem, Document
 from myapp.search.index import TfIdfIndex
 from myapp.search.algorithms import search_in_corpus
 
+INDEX_PATH = "index.pkl"
 
 def build_demo_results(corpus: dict, search_id):
     """
@@ -79,7 +82,17 @@ class SearchEngine:
 
     def build_index(self, corpus):
 
-        self.index = TfIdfIndex(corpus, len(corpus))
+        if not os.path.exists(INDEX_PATH):
+            self.index = TfIdfIndex(corpus, len(corpus))
+            a = {"index": self.index}
+            with open(INDEX_PATH, 'wb') as handle:
+                pickle.dump(a, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            with open(INDEX_PATH, 'rb') as handle:
+                a = pickle.load(handle)
+            self.index = a["index"]
+
+
         self.popularity = compute_popularities(corpus)
 
     def search(self, search_query, search_id, corpus):
