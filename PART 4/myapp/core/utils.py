@@ -1,6 +1,7 @@
 import datetime
 import json
 from random import random
+import csv
 
 from faker import Faker
 
@@ -44,3 +45,4 @@ def load_json_file(path):
     json_data = json.loads(text_data)
     print("------ Json file loaded! Returning", type(json_data))
     return json_data
+        

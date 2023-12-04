@@ -7,16 +7,12 @@ class AnalyticsData:
     An in memory persistence object.
     Declare more variables to hold analytics tables.
     """
-    # statistics table 1
-    # fact_clicks is a dictionary with the click counters: key = doc id | value = click counter
-    fact_clicks = dict([])
+    fact_clicks = dict([]) # Key: doc_Id, Value: num_cliks
 
-    # statistics table 2
-    fact_two = dict([])
+    fact_queries = dict([]) # Key: Query term, Value: number_of_times_each_term_has_appeared_in_the_query
 
-    # statistics table 3
-    fact_three = dict([])
-
+    fact_time = dict([]) # Key: Query_id, Value: time
+    
     def save_query_terms(self, terms: str) -> int:
         print(self)
         return random.randint(0, 100000)

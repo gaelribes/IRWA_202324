@@ -1,9 +1,15 @@
 import os
 from json import JSONEncoder
+import datetime
 
 # pip install httpagentparser
 import httpagentparser  # for getting the user agent as json
 import nltk
+import pickle
+import pandas as pd
+import matplotlib.pyplot as plt
+from collections import Counter
+
 from flask import Flask, render_template, session
 from flask import request
 
@@ -11,7 +17,6 @@ from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc
 from myapp.search.load_corpus import load_corpus
 from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SearchEngine
-
 
 # *** for using method to_json in objects ***
 def _default(self, obj):
@@ -45,6 +50,11 @@ path, filename = os.path.split(full_path)
 # load documents corpus into memory.
 
 file_path = path + "/../data/Rus_Ukr_war_data.json"
+FILE_PATH_CLICKS = path + "/../data/clicks_data.pkl"
+FILE_PATH_QUERIES = path + "/../data/queries_data.pkl"
+FILE_PATH_QUERIES_JSON = path + "/../data/queries_data.json"
+FILE_PATH_TIME = path + "/../data/time_data.pkl"
+
 
 # file_path = "../../tweets-data-who.json"
 corpus = load_corpus(file_path)
@@ -52,6 +62,14 @@ print("\nloaded corpus. first elem:", list(corpus.values())[0], "\n")
 print("\nBuilding index....")
 search_engine.build_index(corpus)
 print("Index built!!\n")
+
+if os.path.exists(FILE_PATH_QUERIES):
+    with open(FILE_PATH_QUERIES, 'rb') as handle:
+        analytics_data.fact_queries = pickle.load(handle)
+
+if os.path.exists(FILE_PATH_CLICKS):
+    with open(FILE_PATH_CLICKS, 'rb') as handle:
+        analytics_data.fact_clicks = pickle.load(handle)
 
 # Home URL "/"
 @app.route('/')
@@ -75,15 +93,36 @@ def index():
     return render_template('index.html', page_title="Welcome")
 
 
-@app.route('/search', methods=['POST'])
+@app.route('/search', methods=['GET'])
 def search_form_post():
-    search_query = request.form['search-query']
+    #search_query = request.form['search-query']
+    search_query = request.args.get('q')
 
     session['last_search_query'] = search_query
 
     search_id = analytics_data.save_query_terms(search_query)
-
+    
+    start = datetime.datetime.now()
     results = search_engine.search(search_query, search_id, corpus)
+    end = datetime.datetime.now()
+    total_time_search = (end-start).total_seconds()
+    
+    # Store 
+
+    analytics_data.fact_time[search_id] = total_time_search
+
+    with open(FILE_PATH_TIME, 'wb') as handle:
+        pickle.dump(analytics_data.fact_time, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+    if search_query in analytics_data.fact_queries.keys():
+        analytics_data.fact_queries[search_query] += 1
+    else:
+        analytics_data.fact_queries[search_query] = 1
+
+    with open(FILE_PATH_QUERIES, 'wb') as handle:
+        pickle.dump(analytics_data.fact_queries, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
     found_count = len(results)
     session['last_found_count'] = found_count
@@ -108,18 +147,43 @@ def doc_details():
     # get the query string parameters from request
     clicked_doc_id = request.args["id"]
     p1 = int(request.args["search_id"])  # transform to Integer
-    p2 = int(request.args["param2"])  # transform to Integer
+    #p2 = int(request.args["param2"])  # transform to Integer
     print("click in id={}".format(clicked_doc_id))
 
-    # store data in statistics table 1
+    # store "click" data in csv
     if clicked_doc_id in analytics_data.fact_clicks.keys():
         analytics_data.fact_clicks[clicked_doc_id] += 1
     else:
         analytics_data.fact_clicks[clicked_doc_id] = 1
 
+    with open(FILE_PATH_CLICKS, 'wb') as handle:
+        pickle.dump(analytics_data.fact_clicks, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+    words = ' '.join(analytics_data.fact_queries.keys())
+    word_counts = Counter(words)
+
+    # Create a Pandas DataFrame for convenience (optional)
+    df_word_counts = pd.DataFrame(list(word_counts.items()), columns=['Word', 'Count'])
+
+    # Create a bar plot using Matplotlib
+    plt.bar(df_word_counts['Word'], df_word_counts['Count'], color='blue', edgecolor='black')
+    plt.xlabel('Words')
+    plt.ylabel('Frequency')
+    plt.title('Word Frequency in Queries')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+
+    # Save the plot as a PNG file
+    plt.savefig(path + "/../data/word_frequency_plot.jpg")
+
+    # Close the plot to prevent displaying it in the script
+    plt.close()
+    
+
     print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks[clicked_doc_id]))
 
-    return render_template('doc_details.html')
+    return render_template('doc_details.html')#, results_list=results, page_title="Results", found_counter=found_count)
 
 
 @app.route('/stats', methods=['GET'])
@@ -176,6 +240,5 @@ def sentiment_form_post():
 
 
 if __name__ == "__main__":
-
 
     app.run(port=8088, host="0.0.0.0", threaded=False, debug=True)
