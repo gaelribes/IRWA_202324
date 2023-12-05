@@ -162,7 +162,7 @@ def doc_details():
 
     print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks[clicked_doc_id]))
 
-    return render_template('doc_details.html')#, results_list=results, page_title="Results", found_counter=found_count)
+    return render_template('doc_details.html')#, clicked_doc_id = clicked_doc_id), results_list=results, page_title="Results", found_counter=found_count)
 
 
 @app.route('/stats', methods=['GET'])
