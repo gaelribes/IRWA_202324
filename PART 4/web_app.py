@@ -7,7 +7,7 @@ import httpagentparser  # for getting the user agent as json
 import nltk
 import pickle
 import pandas as pd
-import matplotlib.pyplot as plt
+import json
 from collections import Counter
 
 from flask import Flask, render_template, session
@@ -160,27 +160,6 @@ def doc_details():
         pickle.dump(analytics_data.fact_clicks, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-    words = ' '.join(analytics_data.fact_queries.keys())
-    word_counts = Counter(words)
-
-    # Create a Pandas DataFrame for convenience (optional)
-    df_word_counts = pd.DataFrame(list(word_counts.items()), columns=['Word', 'Count'])
-
-    # Create a bar plot using Matplotlib
-    plt.bar(df_word_counts['Word'], df_word_counts['Count'], color='blue', edgecolor='black')
-    plt.xlabel('Words')
-    plt.ylabel('Frequency')
-    plt.title('Word Frequency in Queries')
-    plt.xticks(rotation=45, ha='right')
-    plt.tight_layout()
-
-    # Save the plot as a PNG file
-    plt.savefig(path + "/../data/word_frequency_plot.jpg")
-
-    # Close the plot to prevent displaying it in the script
-    plt.close()
-    
-
     print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks[clicked_doc_id]))
 
     return render_template('doc_details.html')#, results_list=results, page_title="Results", found_counter=found_count)
@@ -219,9 +198,18 @@ def dashboard():
 
     # simulate sort by ranking
     visited_docs.sort(key=lambda doc: doc.counter, reverse=True)
+    visited_docs = [d.to_json() for d in visited_docs ]
 
-    for doc in visited_docs: print(doc)
-    return render_template('dashboard.html', visited_docs=visited_docs)
+    terms_query = json.dumps(analytics_data.fact_queries)
+    
+    #print(terms_query)
+    # for doc in visited_docs: print(doc)
+    # print(type(analytics_data.fact_queries))
+    # print(visited_docs)
+    # print(analytics_data.fact_queries)
+    # print(type(terms_query))
+    # print(type(visited_docs))
+    return render_template('dashboard.html', visited_docs=visited_docs, terms_query = terms_query, page_title="Tweets Dashboard")
 
 
 @app.route('/sentiment')

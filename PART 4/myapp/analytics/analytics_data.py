@@ -26,6 +26,13 @@ class ClickedDoc:
 
     def to_json(self):
         return self.__dict__
+    
+    def to_dict(self):
+        return {
+            "doc_id": self.doc_id,
+            "description": self.description,
+            "counter": self.counter,
+        }
 
     def __str__(self):
         """

@@ -38,6 +38,14 @@ def stem_tweet(line):
     
     return line
 
+# Function to display the title of the tweet in the search page
+def stem_tweet_display_version(line):
+    
+    line = re.sub(r'[.,;:!?"\'-@]', '', line).replace("#", "").replace("’", "").replace("“", "").replace("\n"," ")
+    line = remove_emojis(line).strip().replace("  ", " ")
+    
+    return line
+
 class TfIdfIndex():
 
     def __init__(self, corpus, num_documents):
