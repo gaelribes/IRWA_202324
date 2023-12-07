@@ -16,6 +16,11 @@
                 {{ item.doc_date }} — {{ item.description }}
             </div>
 
+            <div style="display: flex; justify-content: center; align-items: center; max-width: 100%">
+                <p style="padding:12px"><span style="color:red">&#x2764;</span> {{ item.likes }}</p>
+                <p style="padding:12px">&#128257; {{item.retweets}} </p>
+            </div>
+        <hr>
         </div>
 
     {% endfor %}

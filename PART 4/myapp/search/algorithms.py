@@ -62,7 +62,8 @@ def search_in_corpus(query, index, tf, idf, popularity, corpus, search_id, alpha
             item = corpus[i]
             item.title = stem_tweet_display_version(item.title) # Get the text until the first # to display
             results.append(ResultItem(item.id, item.title, item.description, item.doc_date,
-                                "doc_details?id={}&search_id={}&ranking={}".format(item.id, search_id, counter), num+1))
+                                "doc_details?id={}&search_id={}&ranking={}".format(item.id, search_id, counter), num+1,
+                                item.likes, item.retweets))
             counter+=1
 
         return results

@@ -7,6 +7,32 @@
     <link rel="stylesheet" href="{{ url_for('static',filename='styles/custom.css') }}">
     <title>{% block page_title %}{% endblock %} - IRWA Search Engine</title>
     {% block header %}{% endblock %}
+    <style>
+        /* CSS styles for button layout */
+        .button-container-custom {
+            margin-bottom: 10px;
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-custom {
+            display: inline-block;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: white;
+            background-color: #007bff;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            margin: 8px;
+        }
+
+        .btn-custom:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
 <div class="container">

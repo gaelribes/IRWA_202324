@@ -148,6 +148,7 @@ def doc_details():
     clicked_doc_id = request.args["id"]
     p1 = int(request.args["search_id"])  # transform to Integer
     #p2 = int(request.args["param2"])  # transform to Integer
+    tweet = corpus[int(clicked_doc_id)]
     print("click in id={}".format(clicked_doc_id))
 
     # store "click" data in csv
@@ -161,8 +162,7 @@ def doc_details():
 
 
     print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks[clicked_doc_id]))
-
-    return render_template('doc_details.html')#, clicked_doc_id = clicked_doc_id), results_list=results, page_title="Results", found_counter=found_count)
+    return render_template('doc_details.html', tweet = tweet)#, clicked_doc_id = clicked_doc_id), results_list=results, page_title="Results", found_counter=found_count)
 
 
 @app.route('/stats', methods=['GET'])
@@ -210,6 +210,30 @@ def dashboard():
     # print(type(terms_query))
     # print(type(visited_docs))
     return render_template('dashboard.html', visited_docs=visited_docs, terms_query = terms_query, page_title="Tweets Dashboard")
+
+@app.route('/dashboard_2', methods=['GET'])
+def dashboard_2():
+    visited_docs = []
+    print(analytics_data.fact_clicks.keys())
+    for doc_id in analytics_data.fact_clicks.keys():
+        d: Document = corpus[int(doc_id)]
+        doc = ClickedDoc(doc_id, d.description, analytics_data.fact_clicks[doc_id])
+        visited_docs.append(doc)
+
+    # simulate sort by ranking
+    visited_docs.sort(key=lambda doc: doc.counter, reverse=True)
+    visited_docs = [d.to_json() for d in visited_docs ]
+
+    terms_query = json.dumps(analytics_data.fact_queries)
+    
+    #print(terms_query)
+    # for doc in visited_docs: print(doc)
+    # print(type(analytics_data.fact_queries))
+    # print(visited_docs)
+    # print(analytics_data.fact_queries)
+    # print(type(terms_query))
+    # print(type(visited_docs))
+    return render_template('dashboard_2.html', visited_docs=visited_docs, terms_query = terms_query, page_title="Tweets Dashboard")
 
 
 @app.route('/sentiment')

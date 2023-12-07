@@ -1,14 +1,39 @@
 {% extends "base.html" %}
 {% block page_title %}{{ page_title }}{% endblock %}
 {% block content %}
-<div>
-    <a href="#" onclick="history.go(-1)" class="btn btn-primary">Go Back</a>
-</div>
+
 
 <div>
-    <a href="#" onclick="history.go(-2)" class="btn btn-primary">Go Back 2 pages</a>
+    <h3>{{ tweet.title }}</h3>
+
+    <p>{{ tweet.description }}</p>
+
+    <div style="display: flex; justify-content: center; align-items: center; max-width: 100%">
+        <p style="padding:12px"><span style="color:red">&#x2764;</span> {{ tweet.likes }}</p>
+        <p style="padding:12px">&#128257; {{tweet.retweets}} </p>
+    </div>
+
+    <cite style="display: flex; justify-content: left; align-items: left; max-width: 100%">
+        <p>Link to twitter:&nbsp</p>
+        <a href="{{ tweet.url }}">{{ tweet.url }}</a>
+    </cite>
 </div>
 
-<div><a href="/stats" class="btn btn-primary" >Stats</a></div>
-<div><a href="/dashboard" class="btn btn-primary">Dashboard</a></div>
+<br>
+
+<div class="button-container-custom">
+<div class="button-container-custom">
+    <a href="#" onclick="history.go(-1)" class="btn-custom btn-primary">Go Back</a>
+</div>
+<br>
+<div class="button-container-custom">
+    <a href="#" onclick="history.go(-2)" class="btn-custom btn-primary">Go Back 2 pages</a>
+</div>
+<br>
+<div class="button-container-custom"><a href="/stats" class="btn-custom btn-primary" >Stats</a></div>
+<br>
+<div class="button-container-custom"><a href="/dashboard" class="btn-custom btn-primary">Most popular searches</a></div>
+</div>
+
+
 {% endblock %}

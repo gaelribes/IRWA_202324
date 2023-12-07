@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block header %}
+    <!-- Next tag loads Charts.js https://www.chartjs.org/docs/latest/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js"
+            integrity="sha512-tMabqarPtykgDtdtSqCL3uLVM0gS1ZkUAVhRFu1vSEFgvB73niFQWJuvviDyBGBH22Lcau4rHB5p2K2T0Xvr6Q=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock %}
+
+{% block content %}
+
+    <h2>Tweets Dashboard</h2>
+    <p></p>
+
+    <script>
+        // 'visited_docs' is the data coming from Python code.
+        // load the python list in the JS variable 'visits_list':
+        const visits_list = {{ visited_docs | tojson | safe }};
+        console.log("visited docs: ")
+        console.log(visits_list)
+    </script>
+
+    <h5>Ranking of Visited Documents</h5>
+    <div>
+        <p>This line chart displays the ranking of visited documents based on the number of visits each document has received. The x-axis represents the document IDs, and the y-axis represents the visit count.</p>
+    </div>
+
+    <canvas id="dailyVisits" width="100" height="100"></canvas>
+
+    <script>
+        // use JS map function top get just the tweet ids as labels
+        const visitsLabels = visits_list.map(a => "Tweet id: " + a.doc_id);
+        const visitsData = visits_list.map(a => a.counter);
+        const chartData1 = {
+            labels: visitsLabels,
+            datasets: [{
+                label: 'Visits count',
+                data: visitsData,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        };
+
+        const ctx = document.getElementById('dailyVisits').getContext('2d');
+
+        // This will render the chart
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: chartData1,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+    </script>
+
+    <hr>
+    <h5>Print Python data for verification with graph above...</h5>
+    {% for doc in visited_docs %}
+        <div class="pb-3">
+            <div class="">
+                <span class="text-dark"> ({{ doc.counter }} visits) </span> — id: {{ doc.doc_id }}
+                — {{ doc.description }}
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+
+
+{% endblock %}
+
+
